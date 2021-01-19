@@ -1,14 +1,14 @@
 import json
-import requests
 import hashlib
 
 files = []
 
 fileName = open("assets.json", "r")
-data = json.loads(fileName.read())
+fileContent = fileName.read()
+data = json.loads(fileContent)
 
 md5 = hashlib.md5()
-md5.update(bytes(fileName.read(), 'utf-8'))
+md5.update(bytes(fileContent, 'utf-8'))
 hashedData = md5.hexdigest()
 
 version = data['version']
