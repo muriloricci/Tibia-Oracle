@@ -17,16 +17,20 @@ else:
 
 # Read json from URL
 fileName = 'https://static.tibia.com/launcher/assets-current/assets.json'
+packageName = 'https://static.tibia.com/launcher/tibiaclient-windows-current/package.json'
 
 f = requests.get(fileName)
 data = json.loads(f.text)
+
+p = requests.get(packageName)
+pdata = json.loads(p.text)
 
 # Hash json with MD5 method
 md5 = hashlib.md5()
 md5.update(bytes(f.text, 'utf-8'))
 hashedData = md5.hexdigest()
 
-version = data['version']
+version = pdata['version']
 files.extend(data['files'])
 size = 0
 
@@ -48,7 +52,7 @@ if versionR != hashedData:
     
     api = tweepy.API(auth)
     
-    api.update_status(versionText)
+    api.update_status(versionText + '\r\n\n' + 'Version: ' + str(version))
 else:
     versionText = ''
     
