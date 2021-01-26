@@ -3,57 +3,55 @@ import requests
 import hashlib
 import os.path
 import tweepy
-import twitterSecrets
+import secrets
 
-files = []
-versionFileName = 'version.txt'
-
-# Open file with hash version
-if os.path.isfile(versionFileName):
-    versionFile = open(versionFileName, 'r')
-    versionR = versionFile.read()
+# Variables, reading from JSONs and hashes
+versionHash = 'version.txt'
+if os.path.isfile(versionHash):
+    versionFile = open(versionHash, 'r')
+    versionFileRead = versionFile.read()
+    versionFile.close()
 else:
-    versionR = ''
+    versionFileRead = ''
 
-# Read json from URL
-fileName = 'https://static.tibia.com/launcher/assets-current/assets.json'
-packageName = 'https://static.tibia.com/launcher/tibiaclient-windows-current/package.json'
+assets = 'https://static.tibia.com/launcher/assets-current/assets.json'
+package = 'https://static.tibia.com/launcher/tibiaclient-windows-current/package.json'
 
-f = requests.get(fileName)
-data = json.loads(f.text)
+assetsFile = requests.get(assets)
+assetsData = json.loads(assetsFile.text)
 
-p = requests.get(packageName)
-pdata = json.loads(p.text)
+packageFile = requests.get(package)
+packageData = json.loads(packageFile.text)
 
-# Hash json with MD5 method
 md5 = hashlib.md5()
-md5.update(bytes(f.text, 'utf-8'))
-hashedData = md5.hexdigest()
+md5.update(bytes(assetsFile.text, 'utf-8'))
+assetsHash = md5.hexdigest()
 
-version = pdata['version']
-files.extend(data['files'])
-size = 0
+version = packageData['version']
+build = assetsData['version']
 
-# Sum file sizes
-for p in range(len(files)):
-    size += files[p]['packedsize']
+assetsFiles = assetsData['files']
+assetsFilesSize = 0
 
-# Compare hash strings
-if versionR != hashedData:
-    versionText = 'New @Tibia patch detected! #Tibia'
+# Looping files to sum values
+for p in range(len(assetsFiles)):
+    assetsFilesSize += assetsFiles[p]['packedsize']
 
-    # Write hash to version.txt
-    versionW = open(versionFileName, 'w')
-    versionW.write(hashedData)
-    versionW.close()
-
-    auth = tweepy.OAuthHandler(twitterSecrets.apiKey, twitterSecrets.apiKeySecret)
-    auth.set_access_token(twitterSecrets.accessToken, twitterSecrets.accessTokenSecret)
+# Comparing hashes and tweeting if different
+if assetsHash != versionFileRead:
+    versionFileWrite = open(versionHash, 'w')
+    versionFileWrite.write(assetsHash)
+    versionFile.close()
     
+    auth = tweepy.OAuthHandler(secrets.apiKey, secrets.apiKeySecret)
+    auth.set_access_token(secrets.accessToken, secrets.accessTokenSecret)
     api = tweepy.API(auth)
     
-    api.update_status(versionText + '\r\n\n' + 'Version: ' + str(version))
+    api.update_status('New patch available for @Tibia! #Tibia' + '\r\n' 
+        + 'Game version: ' + str(version))
+    print('New patch available for @Tibia! #Tibia' + '\r\n'
+        + 'Game version: ' + str(version) + ' (' + str(build) + ')' + '\r\n'
+        + 'Assets size: ' + str("{:,}".format(assetsFilesSize)))
 else:
-    versionText = ''
-    
-print('Version: ' + str(version) + '\r\n' + 'Size: ' + str("{:,}".format(size)) + '\r\n' + 'Hash: ' + hashedData + '\r\n' + versionText)
+    print('Game version: ' + str(version) + ' (' + str(build) + ')'  + '\r\n'
+        + 'Assets size: ' + str("{:,}".format(assetsFilesSize)))
