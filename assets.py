@@ -47,11 +47,11 @@ if assetsHash != versionFileRead:
     auth.set_access_token(secrets.accessToken, secrets.accessTokenSecret)
     api = tweepy.API(auth)
     
-    api.update_status('New patch available for @Tibia! #Tibia' + '\r\n' 
-        + 'Game version: ' + str(version))
+    api.update_status('New patch available for @Tibia! #Tibia' + '\r\n\n' 
+        + '🔸 Version: ' + str(version) + ' 🆕')
     print('New patch available for @Tibia! #Tibia' + '\r\n'
-        + 'Game version: ' + str(version) + ' (' + str(build) + ')' + '\r\n'
+        + 'Version: ' + str(version) + ' (' + str(build) + ')' + '\r\n'
         + 'Assets size: ' + str("{:,}".format(assetsFilesSize)))
 else:
-    print('Game version: ' + str(version) + ' (' + str(build) + ')'  + '\r\n'
+    print('Version: ' + str(version) + ' (' + str(build) + ')'  + '\r\n'
         + 'Assets size: ' + str("{:,}".format(assetsFilesSize)))
